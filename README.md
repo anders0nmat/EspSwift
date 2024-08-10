@@ -9,11 +9,6 @@ Add the following package to your `Package.swift` dependencies
 .package(url: "https://github.com/anders0nmat/EspSwift.git", branch: "main"),
 ```
 
-Add the following dependency to your `idf_component.yml`
-```yml
-espressif/led_strip: "^2.4.1"
-```
-
 Add the dependency to your target
 ```swift
 .product(name: "EspSwift", package: "EspSwift"),
