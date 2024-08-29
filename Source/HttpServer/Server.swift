@@ -37,8 +37,8 @@ public final class HttpServer {
 		switch httpd_start(&handle, &config) {
 			case ESP_OK: break
 			case ESP_ERR_INVALID_ARG: throw HttpServerError.invalidArgument
-			case ESP_ERR_HTTPD_ALLOC_MEM: throw HttpServerError.allocationFailed
-			case ESP_ERR_HTTPD_TASK: throw HttpServerError.taskCreateFailed
+			case httpd_shims._ESP_ERR_HTTPD_ALLOC_MEM: throw HttpServerError.allocationFailed
+			case httpd_shims._ESP_ERR_HTTPD_TASK: throw HttpServerError.taskCreateFailed
 			case let code: throw HttpServerError.unknown(errorCode: code) 
 		}
 		
@@ -73,8 +73,8 @@ public final class HttpServer {
 		switch success {
 			case ESP_OK: break
 			case ESP_ERR_INVALID_ARG: throw HttpServerError.invalidArgument
-			case ESP_ERR_HTTPD_HANDLERS_FULL: throw HttpServerError.handlersFull
-			case ESP_ERR_HTTPD_HANDLER_EXISTS: throw HttpServerError.handlerExists
+			case httpd_shims._ESP_ERR_HTTPD_HANDLERS_FULL: throw HttpServerError.handlersFull
+			case httpd_shims._ESP_ERR_HTTPD_HANDLER_EXISTS: throw HttpServerError.handlerExists
 			case let errorCode: throw HttpServerError.unknown(errorCode: errorCode)
 		}
 	}
