@@ -60,7 +60,7 @@ extension WiFi {
 		esp_wifi_set_config(WIFI_IF_STA, &config)
 		esp_wifi_start()
 
-		if let eventBits = instance!.eventGroup.wait(for: .any, of: [.connected, .failed], timeout: .maximum) {
+		if let eventBits = instance!.eventGroup.wait(for: [.connected, .failed], .any, timeout: .maximum) {
 			if eventBits.contains(.connected) {
 				print("connected to ap")
 			}
@@ -123,9 +123,11 @@ extension WiFi {
 		var netifAPHandle: OpaquePointer?
 		var netifSTAHandle: OpaquePointer?
 
-		enum EventFlag: UInt32 {
-			case connected
-			case failed
+		struct EventFlag: BitSet {
+			let rawValue: RawValue
+
+			static let connected = Self(bit: 0)
+			static let failed    = Self(bit: 1)
 		}
 
 		var eventGroup = EventGroup<EventFlag>()
