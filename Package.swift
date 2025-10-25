@@ -14,7 +14,6 @@ let package = Package(
 			"WiFi",
 			"HttpServer",
 			"NVS",
-			"GPIO",
             "SPIFFS",
             "Files",
             "Logging",
@@ -33,9 +32,6 @@ let package = Package(
 
         .target(name: "CFiles"),
         .target(name: "Files", dependencies: ["CFiles"]),
-
-		.target(name: "CGPIO"),
-		.target(name: "GPIO", dependencies: [ "CGPIO" ]),
 
 		.target(name: "CFreeRTOS"),
 		.target(name: "FreeRTOS", dependencies: ["CFreeRTOS"]),
