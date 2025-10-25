@@ -13,6 +13,12 @@ let package = Package(
 			"FreeRTOS",
 			"WiFi",
 			"HttpServer",
+			"NVS",
+			"GPIO",
+            "SPIFFS",
+            "Files",
+            "Logging",
+            "JSON",
 		])
     ],
 
@@ -22,16 +28,39 @@ let package = Package(
 
 		.target(name: "CClosures"),
 
-		.target(name: "CEventLoop"),
-		.target(name: "EventLoop", dependencies: ["CEventLoop", "CClosures"]),
+        .target(name: "CLogging"),
+        .target(name: "Logging", dependencies: ["CLogging"]),
+
+        .target(name: "CFiles"),
+        .target(name: "Files", dependencies: ["CFiles"]),
+
+		.target(name: "CGPIO"),
+		.target(name: "GPIO", dependencies: [ "CGPIO" ]),
 
 		.target(name: "CFreeRTOS"),
 		.target(name: "FreeRTOS", dependencies: ["CFreeRTOS"]),
 
+		.target(name: "CEventLoop"),
+		.target(name: "EventLoop", dependencies: ["CEventLoop", "CClosures", "FreeRTOS"]),
+
 		.target(name: "CEspWiFi"),
-		.target(name: "WiFi", dependencies: ["CEspWiFi", "FreeRTOS", "EventLoop"]),
+		.target(name: "WiFi", dependencies: ["CEspWiFi", "FreeRTOS", "EventLoop", "NVS"]),
 
 		.target(name: "CHttpServer"),
-		.target(name: "HttpServer", dependencies: ["CHttpServer", "CClosures"]),
+		.target(name: "HttpServer", dependencies: [
+            "CHttpServer",
+            "CClosures",
+            "Files",
+            "Logging",
+        ]),
+
+        .target(name: "CJSON"),
+        .target(name: "JSON", dependencies: ["CJSON", "Files"]),
+
+		.target(name: "CNVS"),
+		.target(name: "NVS", dependencies: ["CNVS"]),
+
+        .target(name: "CSPIFFS"),
+        .target(name: "SPIFFS", dependencies: ["CSPIFFS"]),
     ]
 )

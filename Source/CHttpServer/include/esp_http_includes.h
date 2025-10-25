@@ -11,9 +11,7 @@ const char* httpd_req_get_uri(httpd_req_t* request) {
 	return request->uri;
 }
 
-namespace httpd_shims {
-	const esp_err_t _ESP_ERR_HTTPD_ALLOC_MEM = ESP_ERR_HTTPD_ALLOC_MEM;
-	const esp_err_t _ESP_ERR_HTTPD_TASK = ESP_ERR_HTTPD_TASK;
-	const esp_err_t _ESP_ERR_HTTPD_HANDLERS_FULL = ESP_ERR_HTTPD_HANDLERS_FULL;
-	const esp_err_t _ESP_ERR_HTTPD_HANDLER_EXISTS = ESP_ERR_HTTPD_HANDLER_EXISTS;
-}
+const esp_err_t _ESP_ERR_HTTPD_ALLOC_MEM = ESP_ERR_HTTPD_ALLOC_MEM;
+const esp_err_t _ESP_ERR_HTTPD_TASK = ESP_ERR_HTTPD_TASK;
+const esp_err_t _ESP_ERR_HTTPD_HANDLERS_FULL = ESP_ERR_HTTPD_HANDLERS_FULL;
+const esp_err_t _ESP_ERR_HTTPD_HANDLER_EXISTS = ESP_ERR_HTTPD_HANDLER_EXISTS;

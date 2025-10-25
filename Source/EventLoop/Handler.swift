@@ -3,12 +3,15 @@ import CClosures
 import CEventLoop
 
 public typealias EventHandler = (esp_event_base_t?, Int32, UnsafeMutableRawPointer?) -> Void
-public typealias EventClosure = Closure<EventHandler>
+internal typealias EventClosure = Closure<EventHandler>
 
 public struct HandlerInstance {
-	internal let handle: esp_event_handler_instance_t
+	internal var handle = esp_event_handler_instance_t(bitPattern: 0)
+	internal var closure: EventClosure
+}
 
-	internal init(handle: esp_event_handler_instance_t) {
-		self.handle = handle
+extension HandlerInstance: Equatable {
+	public static func ==(lhs: Self, rhs: Self) -> Bool {
+		lhs.closure === rhs.closure && lhs.handle == rhs.handle
 	}
 }

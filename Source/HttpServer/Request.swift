@@ -1,8 +1,11 @@
 
 import CHttpServer
+import Files
 
 public struct Request {
 	private var handle: UnsafeMutablePointer<httpd_req_t>
+
+    internal var success = true
 
 	internal init(handle: UnsafeMutablePointer<httpd_req_t>) {
 		self.handle = handle
@@ -31,6 +34,10 @@ public struct Request {
 	public var headers: Header { Header(handle: handle) }
 	public var query: Query
 
+    public mutating func failed() {
+        success = false
+    }
+
 	public func contentString() -> String {
 		guard contentLength > 0 else { return "" }
 
@@ -49,50 +56,70 @@ public struct Request {
 		}
 	}
 
-	internal func respond(content: UnsafeBufferPointer<UInt8>, status: HttpStatus, contentType: HttpContentType, extraHeaders: [(String, String)]) {
-		httpd_resp_set_status(handle, status.value)
-		httpd_resp_set_type(handle, contentType.value)
+	internal func respond(content: UnsafeBufferPointer<UInt8>, count: Int? = nil, status: HttpStatus, contentType: MimeType, extraHeaders: [(String, String)]) {
+        status.value.withCString { status in
+            contentType.description.withCString { contentType in   
+                httpd_resp_set_status(handle, status)
+                httpd_resp_set_type(handle, contentType)
 
-		for (key, value) in extraHeaders {
-			httpd_resp_set_hdr(handle, key, value)
-		}
+                for (key, value) in extraHeaders {
+                    httpd_resp_set_hdr(handle, key, value)
+                }
 
-		httpd_resp_send(handle, content.baseAddress, content.count)
+                httpd_resp_send(handle, content.baseAddress, count ?? content.count)
+            }
+        }
 	}
 
-	public func respond(with content: String, status: HttpStatus = .OK, contentType: HttpContentType = .html, extraHeaders: [(String, String)] = []) {
+	public func respondWith(_ content: String, status: HttpStatus = .OK, contentType: MimeType = .text(.plain), extraHeaders: [(String, String)] = []) {
 		var content = content
 		content.withUTF8 { ptr in
 			respond(content: ptr, status: status, contentType: contentType, extraHeaders: extraHeaders)
 		}
 	}
 
-	public func respond(with content: [UInt8], status: HttpStatus = .OK, contentType: HttpContentType = .html, extraHeaders: [(String, String)] = []) {
+	public func respondWith(_ content: [UInt8], status: HttpStatus = .OK, contentType: MimeType = .text(.plain), extraHeaders: [(String, String)] = []) {
 		content.withUnsafeBufferPointer { ptr in
 			respond(content: ptr, status: status, contentType: contentType, extraHeaders: extraHeaders)
 		}
 	}
 
-	public func respond(_ error: HttpErrorStatus, message: String? = nil) {
-		if message == nil {
-			httpd_resp_send_err(handle, error.value, UnsafePointer<CChar>(bitPattern: 0))
-		}
-		else {
-			httpd_resp_send_err(handle, error.value, message)
-		}
+    public func respondWith(buffer: borrowing Buffer, status: HttpStatus = .OK, contentType: MimeType = .text(.plain), extraHeaders: [(String, String)] = []) {
+        respond(content: UnsafeBufferPointer<UInt8>(buffer.data), count: buffer.count, status: status, contentType: contentType, extraHeaders: extraHeaders)
+    }
+
+    public func respondWith(error: HttpErrorStatus, message: String? = nil) {
+        httpd_resp_send_err(handle, error.value, message)
+    }
+
+	public func respondWith(file: String, status: HttpStatus = .OK, contentType: MimeType? = nil, extraHeaders: [(String, String)] = []) {
+        respondChunked(status: status, contentType: contentType ?? mimeType(of: file), extraHeaders: extraHeaders) { respondWith in
+            let file = File.open(file)
+            var buffer = Buffer(size: 1024)
+            repeat {
+                file.read(&buffer)
+                if !buffer.isEmpty {
+                    respondWith(buffer: buffer)
+                }
+            } while !file.isEof
+        }
 	}
 
-	public func respond(status: HttpStatus = .OK, contentType: HttpContentType = .html, extraHeaders: [(String, String)] = [], content: (ChunkedResponseSender) -> Void) {
-		httpd_resp_set_status(handle, status.value)
-		httpd_resp_set_type(handle, contentType.value)
+	public func respondChunked(status: HttpStatus = .OK, contentType: MimeType = .text(.plain), extraHeaders: [(String, String)] = [], content: (_ respondWith: ChunkedResponseSender) -> Void) {
+        status.value.withCString { status in
+            contentType.description.withCString { contentType in
+                httpd_resp_set_status(handle, status)
+                httpd_resp_set_type(handle, contentType)
 
-		for (key, value) in extraHeaders {
-			httpd_resp_set_hdr(handle, key, value)
-		}
+                for (key, value) in extraHeaders {
+                    httpd_resp_set_hdr(handle, key, value)
+                }
 
-		content(ChunkedResponseSender(handle: handle))
+                content(ChunkedResponseSender(handle: handle))
 
-		httpd_resp_send_chunk(handle, UnsafePointer<CChar>(bitPattern: 0), 0)
+                httpd_resp_send_chunk(handle, nil, 0)
+            }
+        }
 	}
 }
 
@@ -154,5 +181,9 @@ extension Request {
 				_ = httpd_resp_send_chunk(handle, ptr.baseAddress, content.count)	
 			}
 		}
+
+        public func callAsFunction(buffer: borrowing Buffer) {
+            _ = httpd_resp_send_chunk(handle, buffer.start, buffer.count)
+        }
 	}
 }

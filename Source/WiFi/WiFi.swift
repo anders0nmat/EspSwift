@@ -2,6 +2,7 @@
 import CEspWiFi
 import FreeRTOS
 import EventLoop
+import NVS
 
 public enum WiFi {
 	nonisolated(unsafe) private static var instance: WiFiInstance?
@@ -13,11 +14,9 @@ extension WiFi {
 
 		instance = WiFiInstance(mode: mode)
 
-		nvs_flash_init()
+		NVS.initDefault()
 
 		esp_netif_init()
-
-		DefaultEventLoop.create()
 
 		switch mode {
 		case .station:
@@ -32,11 +31,11 @@ extension WiFi {
 		var config = esp_wifi_config_default()
 		esp_wifi_init(&config)
 
-		DefaultEventLoop.registerHandler(for: WiFiEvent.self) {
+		EventLoop.default.register(for: WiFiEvent.self) {
 			WiFi.instance?.event_handler(event_base: $0, event_id: $1, event_data: $2)
 		}
 
-		DefaultEventLoop.registerHandler(for: (IP_EVENT, Int32(IP_EVENT_STA_GOT_IP.rawValue))) {
+		EventLoop.default.register(for: (IP_EVENT, Int32(IP_EVENT_STA_GOT_IP.rawValue))) {
 			WiFi.instance?.event_handler(event_base: $0, event_id: $1, event_data: $2)
 		}
 	}

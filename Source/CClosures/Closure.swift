@@ -52,7 +52,7 @@ public final class Closure<Function> {
 		Closure can be retrieved with `Closure.fromOpaque()`
 	*/
 	public func toOpaque() -> UnsafeMutableRawPointer {
-		Unmanaged.passUnretained(self).toOpaque()
+		Unmanaged.passRetained(self).toOpaque()
 	}
 
 	/** Retrives a Closure object from a pointer previously obtained by `Closure.toOpaque()`

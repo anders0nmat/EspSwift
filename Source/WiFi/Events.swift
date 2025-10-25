@@ -2,8 +2,9 @@
 import EventLoop
 import CEspWiFi
 
-public enum WiFiEvent: EventBase {
-    public static var identifier: esp_event_base_t { WIFI_EVENT }
+public enum WiFiEvent: EventLoop.Event {
+	public static var identifier: StaticString { "WIFI_EVENT" }
+    public static var eventBase: esp_event_base_t? { WIFI_EVENT }
 
 	case wifiReady
 	case scanDone
@@ -97,6 +98,54 @@ public enum WiFiEvent: EventBase {
 		case .ndpConfirm: Int32(WIFI_EVENT_NDP_CONFIRM.rawValue)
 		case .ndpTerminated: Int32(WIFI_EVENT_NDP_TERMINATED.rawValue)
 		case .homeChannelChange: Int32(WIFI_EVENT_HOME_CHANNEL_CHANGE.rawValue)
+		}
+	}
+
+	public init?(rawValue: Int32) {
+		switch UInt32(rawValue) {
+			case WIFI_EVENT_WIFI_READY.rawValue: self = .wifiReady
+			case WIFI_EVENT_SCAN_DONE.rawValue: self = .scanDone
+			case WIFI_EVENT_STA_START.rawValue: self = .staStart
+			case WIFI_EVENT_STA_STOP.rawValue: self = .staStop
+			case WIFI_EVENT_STA_CONNECTED.rawValue: self = .staConnected
+			case WIFI_EVENT_STA_DISCONNECTED.rawValue: self = .staDisconnected
+			case WIFI_EVENT_STA_AUTHMODE_CHANGE.rawValue: self = .staAuthmodeChange
+			case WIFI_EVENT_STA_WPS_ER_SUCCESS.rawValue: self = .staWpsErSuccess
+			case WIFI_EVENT_STA_WPS_ER_FAILED.rawValue: self = .staWpsErFailed
+			case WIFI_EVENT_STA_WPS_ER_TIMEOUT.rawValue: self = .staWpsErTimeout
+			case WIFI_EVENT_STA_WPS_ER_PIN.rawValue: self = .staWpsErPin
+			case WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP.rawValue: self = .staWpsErPbcOverlap
+			case WIFI_EVENT_AP_START.rawValue: self = .apStart
+			case WIFI_EVENT_AP_STOP.rawValue: self = .apStop
+			case WIFI_EVENT_AP_STACONNECTED.rawValue: self = .apStaconnected
+			case WIFI_EVENT_AP_STADISCONNECTED.rawValue: self = .apStadisconnected
+			case WIFI_EVENT_AP_PROBEREQRECVED.rawValue: self = .apProbereqrecved
+			case WIFI_EVENT_FTM_REPORT.rawValue: self = .ftmReport
+			case WIFI_EVENT_STA_BSS_RSSI_LOW.rawValue: self = .staBssRssiLow
+			case WIFI_EVENT_ACTION_TX_STATUS.rawValue: self = .actionTxStatus
+			case WIFI_EVENT_ROC_DONE.rawValue: self = .rocDone
+			case WIFI_EVENT_STA_BEACON_TIMEOUT.rawValue: self = .staBeaconTimeout
+			case WIFI_EVENT_CONNECTIONLESS_MODULE_WAKE_INTERVAL_START.rawValue: self = .connectionlessModuleWakeIntervalStart
+			case WIFI_EVENT_AP_WPS_RG_SUCCESS.rawValue: self = .apWpsRgSuccess
+			case WIFI_EVENT_AP_WPS_RG_FAILED.rawValue: self = .apWpsRgFailed
+			case WIFI_EVENT_AP_WPS_RG_TIMEOUT.rawValue: self = .apWpsRgTimeout
+			case WIFI_EVENT_AP_WPS_RG_PIN.rawValue: self = .apWpsRgPin
+			case WIFI_EVENT_AP_WPS_RG_PBC_OVERLAP.rawValue: self = .apWpsRgPbcOverlap
+			case WIFI_EVENT_ITWT_SETUP.rawValue: self = .itwtSetup
+			case WIFI_EVENT_ITWT_TEARDOWN.rawValue: self = .itwtTeardown
+			case WIFI_EVENT_ITWT_PROBE.rawValue: self = .itwtProbe
+			case WIFI_EVENT_ITWT_SUSPEND.rawValue: self = .itwtSuspend
+			case WIFI_EVENT_TWT_WAKEUP.rawValue: self = .twtWakeup
+			case WIFI_EVENT_NAN_STARTED.rawValue: self = .nanStarted
+			case WIFI_EVENT_NAN_STOPPED.rawValue: self = .nanStopped
+			case WIFI_EVENT_NAN_SVC_MATCH.rawValue: self = .nanSvcMatch
+			case WIFI_EVENT_NAN_REPLIED.rawValue: self = .nanReplied
+			case WIFI_EVENT_NAN_RECEIVE.rawValue: self = .nanReceive
+			case WIFI_EVENT_NDP_INDICATION.rawValue: self = .ndpIndication
+			case WIFI_EVENT_NDP_CONFIRM.rawValue: self = .ndpConfirm
+			case WIFI_EVENT_NDP_TERMINATED.rawValue: self = .ndpTerminated
+			case WIFI_EVENT_HOME_CHANNEL_CHANGE.rawValue: self = .homeChannelChange
+			default: return nil
 		}
 	}
 }
